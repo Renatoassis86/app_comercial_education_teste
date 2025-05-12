@@ -1,0 +1,7 @@
+from . import pagina_inicial
+from . import sobre
+from . import cadastro
+from . import jornada
+from . import dashboard
+from . import registro
+from . import tabela

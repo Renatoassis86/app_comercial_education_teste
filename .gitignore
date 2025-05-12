@@ -1,0 +1,37 @@
+
+# Ambientes virtuais
+.venv/
+venv/
+.env
+
+# Configurações do sistema
+.DS_Store
+Thumbs.db
+
+# Bytecode / cache Python
+__pycache__/
+*.py[cod]
+
+# Logs
+*.log
+
+# Arquivos de banco de dados locais
+*.sqlite3
+*.db
+
+# Arquivos de ambiente
+.env
+
+# Arquivos temporários de execução
+*.bak
+*.swp
+*.tmp
+
+# Dados de execução do Streamlit
+.cache/
+.mypy_cache/
+.streamlit/
+
+# Arquivos exportados
+*.csv
+*.xlsx
