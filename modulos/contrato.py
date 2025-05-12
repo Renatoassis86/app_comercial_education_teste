@@ -1,5 +1,10 @@
 import streamlit as st
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+# Carregar variáveis do .env
+load_dotenv()
 
 def carregar():
     st.title("🔐 Acesso Restrito - Área Administrativa")
@@ -10,7 +15,7 @@ def carregar():
         login = st.form_submit_button("Entrar")
 
     if login:
-        if email.strip().lower() == "administrativo.education@cidadeviva.org" and senha == "Education@2024#":
+        if email.strip().lower() == "administrativo.education@cidadeviva.org" and senha == os.getenv("USER_PASSWORD"):
             st.success("✅ Login realizado com sucesso!")
             mostrar_area_contrato()
         else:
