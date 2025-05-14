@@ -1,5 +1,6 @@
 import streamlit as st
 import psycopg2.extras
+import pandas as pd
 from utils.conexao import conectar
 from utils.estados_cidades import carregar_estados
 from utils.banners import exibir_banner
@@ -176,8 +177,6 @@ def carregar():
 
         except Exception as e:
             st.error(f"❌ Erro ao salvar: {e}")
-        
-    
 
 
     st.markdown("---")
@@ -187,7 +186,6 @@ def carregar():
 
     if arquivo is not None:
         try:
-            import pandas as pd
             df = pd.read_excel(arquivo).fillna("")
             st.write("Pré-visualização dos dados:", df)
 
@@ -199,6 +197,9 @@ def carregar():
                         conn = conectar()
                         cursor = conn.cursor()
                         total_importadas = 0
+                        total_linhas = len(df)
+                        log_erros = []
+
 
                         for index, row in df.iterrows():
                             try:
@@ -212,21 +213,19 @@ def carregar():
 
                                 # Validações
                                 if len(estado) > 2:
-                                    raise ValueError(f"Linha {index + 2}: 'estado' com mais de 2 caracteres: '{estado}'")
+                                    msg = f"Linha {index + 2}: estado inválido '{estado}'"
+                                    st.warning(f"⚠️ {msg}")
+                                    log_erros.append(msg)
+                                    continue
                                 if len(nome_normalizado) > 255:
-                                    raise ValueError(f"Linha {index + 2}: 'nome_escola' excede 255 caracteres.")
+                                    msg = f"Linha {index + 2}: nome da escola excede 255 caracteres"
+                                    st.warning(f"⚠️ {msg}")
+                                    log_erros.append(msg)
+                                    continue
                                 if len(cnpj_normalizado) > 20:
-                                    raise ValueError(f"Linha {index + 2}: 'cnpj' excede 20 caracteres.")
-
-                                # Verificação de duplicidade
-                                cursor.execute("""
-                                    SELECT COUNT(*) FROM escolas 
-                                    WHERE LOWER(TRIM(nome_escola)) = %s OR 
-                                          REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '/', ''), '-', '') = %s
-                                """, (nome_normalizado, cnpj_normalizado))
-
-                                if cursor.fetchone()[0] > 0:
-                                    st.info(f"ℹ️ Linha {index + 2}: escola já cadastrada - {nome_original}")
+                                    msg = f"Linha {index + 2}: CNPJ excede 20 caracteres"
+                                    st.warning(f"⚠️ {msg}")
+                                    log_erros.append(msg)
                                     continue
 
                                 # Inserção
@@ -262,19 +261,29 @@ def carregar():
                                 ))
 
                                 total_importadas += 1
+                                st.info(f"✅ Linha {index + 2}: {nome_original} importada com sucesso.")
 
                             except Exception as linha_erro:
-                                st.error(f"❌ Erro na linha {index + 2}: {linha_erro}")
+                                msg = f"❌ Erro na linha {index + 2}: {linha_erro}"
+                                st.error(msg)
+                                log_erros.append(msg)
 
                         conn.commit()
                         conn.close()
 
-                        if total_importadas > 0:
-                            st.success(f"✅ {total_importadas} escola(s) importada(s) com sucesso!")
-                        else:
-                            st.info("ℹ️ Nenhuma escola nova foi importada (já existente ou com erro).")
+                        st.success(f"🎯 Total de linhas processadas: {total_linhas}")
+                        st.success(f"📥 Total de escolas importadas: {total_importadas}")
+
+                        # Salvar relatório de erros
+                        if log_erros:
+                            log_path = "/mnt/data/relatorio_erros_importacao.txt"
+                            with open(log_path, "w", encoding="utf-8") as f:
+                                for linha in log_erros:
+                                    f.write(f"{linha}\n")
+                            st.download_button("📄 Baixar relatório de erros", data=open(log_path, "rb"), file_name="relatorio_erros_importacao.txt", mime="text/plain")
 
                     except Exception as e:
                         st.error(f"❌ Erro ao conectar ou importar: {e}")
+
         except Exception as e:
             st.error(f"❌ Erro ao ler o arquivo: {e}")
