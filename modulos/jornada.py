@@ -1,4 +1,3 @@
-
 import streamlit as st
 import psycopg2.extras
 from utils.banners import exibir_banner
@@ -45,6 +44,11 @@ def carregar():
                 return
 
             for registro in registros:
+                encaminhamentos = (
+                    ", ".join([e.strip() for e in registro["encaminhamento"].split(",")])
+                    if registro["encaminhamento"] else "Nenhum"
+                )
+
                 st.markdown(f"""
                     <div class="jornada-card">
                         <strong>Data:</strong> {registro['data_contato'].strftime('%d/%m/%Y')}<br>
@@ -54,7 +58,7 @@ def carregar():
                         <strong>Interesse:</strong> {registro['interesse']}<br>
                         <strong>Prontidão:</strong> {registro['prontidao']}<br>
                         <strong>Abertura:</strong> {registro['abertura']}<br>
-                        <strong>Encaminhamento:</strong> {registro['encaminhamento']}<br>
+                        <strong>Encaminhamentos:</strong> {encaminhamentos}<br>
                         <strong>Potencial Financeiro:</strong> R$ {registro['potencial_financeiro']:,.2f}<br>
                         <strong>Classificação do Lead:</strong> {registro['classificacao_lead']}<br>
                         <strong>Probabilidade:</strong> {registro['probabilidade']}%

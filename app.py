@@ -2,7 +2,7 @@
 import streamlit as st
 from utils.css import aplicar_estilo
 from utils.banners import exibir_banner
-from modulos import pagina_inicial, sobre, cadastro, registro, jornada, dashboard, tabela, contrato
+from modulos import pagina_inicial, sobre, cadastro, registro, jornada, dashboard, tabela, download, jornada_contratual
 
 
 st.set_page_config(page_title="Cidade Viva Education", layout="wide")
@@ -18,7 +18,7 @@ st.markdown("<hr>", unsafe_allow_html=True)
 # Menu de navegação em abas centralizado
 abas = st.tabs([
     "Página Inicial", "Sobre", "Cadastro", "Registro",
-    "Jornada", "Dashboard", "Tabela", "Contrato"
+    "Jornada", "Dashboard", "Tabela", "Download", "Jornada Contratual"
 ])
 
 # Conteúdo por aba
@@ -37,7 +37,9 @@ with abas[5]:
 with abas[6]:
     tabela.carregar()
 with abas[7]:
-    contrato.carregar()  # ✅ chamada correta e única
+    download.carregar()  
+with abas[8]:
+    jornada_contratual.carregar()
 
 
 st.markdown(

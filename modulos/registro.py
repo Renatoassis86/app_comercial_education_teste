@@ -1,160 +1,160 @@
 import streamlit as st
-import psycopg2.extras
 import pandas as pd
+import psycopg2.extras
+from datetime import datetime
 from utils.banners import exibir_banner
 from utils.conexao import conectar
+from utils.helpers import calcular_potencial_financeiro, calcular_probabilidade, calcular_classificacao
 
-# === Funções Auxiliares === #
 
-def calcular_potencial_financeiro(infantil, fund1, fund2, medio, ticket=1000):
-    return (infantil + fund1 + fund2 + medio) * ticket
-
-def calcular_classificacao(probabilidade, potencial):
-    # Exemplo simples com base em benchmarks de CRM
-    if probabilidade >= 70 and potencial >= 100000:
-        return "Lead Quente"
-    elif probabilidade >= 40 and potencial >= 50000:
-        return "Lead Morno"
-    else:
-        return "Lead Frio"
-
-def calcular_probabilidade(interesse, prontidao, abertura):
-    pesos = {
-        "Muito Baixo": 0, "Baixo": 1, "Médio": 2, "Alto": 3, "Muito Alto": 4,
-        "Negociação Parada": 0, "Nova Reunião Necessária": 1, "Esperando Retorno": 2, 
-        "Apresentação em Andamento": 3, "Contrato Enviado": 4, "Contrato Assinado": 5,
-        "Nenhuma": 0, "Baixa": 1, "Média": 2, "Alta": 3
-    }
-    total = pesos.get(interesse, 0) + pesos.get(prontidao, 0) + pesos.get(abertura, 0)
-    return int((total / 12) * 100)
-
-def get_nomes_escolas():
-    try:
-        conn = conectar()
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, nome_escola FROM escolas")
-        resultados = cursor.fetchall()
-        conn.close()
-        return {nome: id for id, nome in resultados}
-    except:
-        return {}
-
-# === Página === #
 def carregar():
     exibir_banner("banner_registro")
-    st.markdown("<h2 style='color:#1f538d;'>Registro de Relacionamento Comercial</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color:#1f538d;'>Registro de Relacionamento</h2>", unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class='caixa-branca'>
-    <p>Este formulário tem como objetivo registrar todas as interações comerciais e pedagógicas com as escolas, permitindo análise contínua e estratégica do relacionamento.</p>
-    <p>Essas informações permitem:</p>
-    <ul>
-        <li>Diagnóstico da maturidade do lead;</li>
-        <li>Priorização por potencial de retorno;</li>
-        <li>Identificação de gargalos no processo de negociação;</li>
-        <li>Geração automática de métricas com base estatística, como:</li>
-        <ul>
-            <li><strong>Probabilidade de Fechamento</strong>: média ponderada de interesse, prontidão e abertura para proposta, normalizada de 0 a 100;</li>
-            <li><strong>Classificação do Lead</strong>: categorização com base em clusters comerciais (Frio, Morno, Quente) pela combinação de probabilidade e potencial financeiro;</li>
-            <li><strong>Potencial Financeiro</strong>: multiplicação da quantidade de alunos por segmento pelo ticket médio (R$ 1.000);</li>
-        </ul>
-    </ul>
-    <p>Essas métricas seguem lógica semelhante às utilizadas em CRMs de mercado como Salesforce, Pipedrive e RD Station, com fundamentação prática e estatística.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # === Carregar Escolas ===
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, nome_escola FROM escolas ORDER BY nome_escola")
+    escolas = cursor.fetchall()
+    conn.close()
 
-    escolas_dict = get_nomes_escolas()
-    escolas_nomes = list(escolas_dict.keys())
+    escolas_dict = {nome: id_ for id_, nome in escolas}
 
-    with st.form("formulario_registro"):
-        st.markdown("### 📝 Informações da Negociação")
-        nome_escola = st.selectbox("Nome da Escola (Escolha uma escola previamente cadastrada)", [""] + escolas_nomes, key="registro_escola")
-        st.date_input("Data do Contato (Data da interação)", key="registro_data")
-        st.text_area("Resumo do Contato (Resumo da conversa e pontos discutidos)", key="registro_resumo")
-        st.selectbox("Meio de Contato (Canal utilizado para interação)", ["", "Presencial", "WhatsApp", "E-mail", "Telefone", "Videoconferência"], key="registro_meio")
-        st.text_input("Contato da Escola (Pessoa que participou da conversa)", key="registro_contato")
-        st.selectbox("Cargo do Contato (Cargo da pessoa da escola)", ["", "Mantenedor", "Gestor", "Diretor", "Coordenador", "Professor", "Secretário(a)", "Outro"], key="registro_cargo")
-        st.selectbox("Responsável pelo Contato (Agente do Education)", ["", "Raissa Fernandes", "Ranieri França", "Emmanuel Pires", "Isabela Rolim", "Renato Assis", "Thiago Dutra", "Bia Ruggeri", "Jhon Jarison", "Layla Ramos"], key="registro_responsavel")
+    st.markdown("### 🏫 Dados da Escola")
+    nome_escola = st.selectbox("Selecione a escola", [""] + list(escolas_dict.keys()))
 
-        st.markdown("### 🔍 Diagnóstico de Interesse")
-        st.selectbox("Interesse (Nível de interesse percebido)", ["", "Muito Baixo", "Baixo", "Médio", "Alto", "Muito Alto"], key="registro_interesse")
-        st.selectbox("Prontidão (Fase da negociação)", ["", "Negociação Parada", "Nova Reunião Necessária", "Esperando Retorno", "Apresentação em Andamento", "Contrato Enviado", "Contrato Assinado"], key="registro_prontidao")
-        st.selectbox("Abertura para Proposta (Disposição para avançar)", ["", "Nenhuma", "Baixa", "Média", "Alta"], key="registro_abertura")
-        st.selectbox("Encaminhamento Atual (Próximo passo previsto)", ["", "Agendamento de Reunião", "Apresentação Currículo", "Envio de Material", "Nova Visita", "Contato Futuro", "Elaboração de Contrato", "Contrato Enviado", "Contrato Assinado"], key="registro_encaminhamento")
+    if nome_escola:
+        st.markdown("### 🗒️ Dados do Registro")
+        data_contato = st.date_input("Data do contato", value=datetime.now().date())
+        hora_contato = datetime.now().time()  # Hora automática, não precisa ser preenchida manualmente
 
-        gerar = st.form_submit_button("📊 Gerar Métricas")
+        resumo = st.text_area("Resumo do Contato (Resumo da conversa e pontos discutidos)")
 
-        infantil = fund1 = fund2 = medio = 0
-        if nome_escola and escolas_dict.get(nome_escola):
-            try:
-                conn = conectar()
-                cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                cursor.execute("SELECT qtd_infantil, qtd_fund1, qtd_fund2, qtd_medio FROM escolas WHERE id = %s", (escolas_dict[nome_escola],))
-                dados = cursor.fetchone()
-                if dados:
-                    infantil = dados["qtd_infantil"] or 0
-                    fund1 = dados["qtd_fund1"] or 0
-                    fund2 = dados["qtd_fund2"] or 0
-                    medio = dados["qtd_medio"] or 0
-                conn.close()
-            except Exception as e:
-                st.warning(f"Erro ao buscar dados da escola: {e}")
+        meio = st.selectbox("Meio do contato", ["", "Presencial", "WhatsApp", "E-mail", "Telefone", "Videoconferência"])
+        responsavel = st.text_input("Responsável pelo contato")
+        contato = st.text_input("Nome do contato da escola")
+        cargo = st.selectbox("Cargo do contato", ["", "Mantenedor", "Gestor", "Diretor", "Coordenador", "Professor", "Secretário(a)", "Outro"])
 
-        if gerar:
+        st.markdown("### 📊 Diagnóstico de Interesse")
+        interesse = st.selectbox("Interesse (Nível de interesse percebido)", ["", "Muito Baixo", "Baixo", "Médio", "Alto", "Muito Alto"])
+
+        prontidao = st.selectbox("Prontidão (Fase da negociação)", [
+            "", "Negociação Parada", "Nova Reunião Necessária", "Esperando Retorno", 
+            "Apresentação em Andamento", "Contrato Enviado", "Atualizar Contrato", "Contrato Assinado"
+        ])
+
+        abertura = st.selectbox("Abertura para Proposta (Disposição para avançar)", ["", "Nenhuma", "Baixa", "Média", "Alta"])
+
+        encaminhamentos = st.multiselect("Encaminhamento Atual (Próximo passo previsto)", [
+            "Agendamento de Reunião", "Apresentação Currículo", "Envio de Material", "Nova Visita", 
+            "Contato Futuro", "Elaboração de Contrato", "Contrato Enviado", "Contrato Assinado"
+        ])
+
+        st.markdown("### 🎯 Informações Quantitativas")
+        infantil = st.number_input("Qtd Infantil", min_value=0, step=1)
+        fund1 = st.number_input("Qtd Fund1", min_value=0, step=1)
+        fund2 = st.number_input("Qtd Fund2", min_value=0, step=1)
+        medio = st.number_input("Qtd Médio", min_value=0, step=1)
+
+        # === Calcular Métricas ===
+        if st.button("🔍 Gerar Métricas"):
             potencial = calcular_potencial_financeiro(infantil, fund1, fund2, medio)
-            probabilidade = calcular_probabilidade(st.session_state.registro_interesse, st.session_state.registro_prontidao, st.session_state.registro_abertura)
+            probabilidade = calcular_probabilidade(interesse, prontidao, abertura, encaminhamentos)
             classificacao = calcular_classificacao(probabilidade, potencial)
 
-            st.markdown("### 🔎 Métricas Estratégicas")
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Potencial Financeiro", f"R$ {potencial:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
-            col2.metric("Probabilidade", f"{probabilidade}%")
-            col3.metric("Classificação", classificacao)
+            st.success(f"Potencial Financeiro: R$ {potencial:,.2f}")
+            st.success(f"Probabilidade de Fechamento: {probabilidade}%")
+            st.success(f"Classificação do Lead: {classificacao}")
 
-        salvar = st.form_submit_button("💾 Salvar Registro")
-        if salvar:
-            if not nome_escola or nome_escola not in escolas_dict:
-                st.warning("⚠️ Por favor, selecione uma escola cadastrada para registrar o relacionamento.")
-            else:
-                try:
-                    # Recalcular as métricas antes de salvar
-                    potencial = calcular_potencial_financeiro(infantil, fund1, fund2, medio)
-                    probabilidade = calcular_probabilidade(
-                        st.session_state.registro_interesse,
-                        st.session_state.registro_prontidao,
-                        st.session_state.registro_abertura
-                    )
-                    classificacao = calcular_classificacao(probabilidade, potencial)
+        # === Salvar no Banco ===
+        if st.button("💾 Salvar Registro"):
+            try:
+                potencial = calcular_potencial_financeiro(infantil, fund1, fund2, medio)
+                probabilidade = calcular_probabilidade(interesse, prontidao, abertura, encaminhamentos)
+                classificacao = calcular_classificacao(probabilidade, potencial)
 
-                    conn = conectar()
-                    cursor = conn.cursor()
+                conn = conectar()
+                cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+                # Verificar se já existe registro idêntico
+                cursor.execute("""
+                    SELECT COUNT(*) FROM registros 
+                    WHERE id_escola = %s AND data_contato = %s AND hora_contato = %s AND resumo = %s
+                """, (escolas_dict.get(nome_escola), data_contato, hora_contato, resumo))
+                existe = cursor.fetchone()[0]
+
+                if existe > 0:
+                    st.warning("⚠️ Registro idêntico já existe. Altere alguma informação para salvar.")
+                else:
                     cursor.execute("""
                         INSERT INTO registros (
-                            id_escola, data_contato, resumo, meio_contato,
+                            id_escola, data_contato, hora_contato, resumo, meio_contato,
                             interesse, prontidao, abertura, encaminhamento,
                             responsavel, contato, cargo, qtd_infantil, qtd_fund1,
                             qtd_fund2, qtd_medio, potencial_financeiro,
                             classificacao_lead, probabilidade
-                        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                     """, (
                         escolas_dict.get(nome_escola),
-                        st.session_state.registro_data,
-                        st.session_state.registro_resumo,
-                        st.session_state.registro_meio,
-                        st.session_state.registro_interesse,
-                        st.session_state.registro_prontidao,
-                        st.session_state.registro_abertura,
-                        st.session_state.registro_encaminhamento,
-                        st.session_state.registro_responsavel,
-                        st.session_state.registro_contato,
-                        st.session_state.registro_cargo,
-                        infantil, fund1, fund2, medio,
+                        data_contato,
+                        hora_contato,
+                        resumo,
+                        meio,
+                        interesse,
+                        prontidao,
+                        abertura,
+                        ", ".join(encaminhamentos),
+                        responsavel,
+                        contato,
+                        cargo,
+                        infantil,
+                        fund1,
+                        fund2,
+                        medio,
                         potencial,
                         classificacao,
                         probabilidade
                     ))
                     conn.commit()
                     conn.close()
-                    st.success("✅ Registro salvo com sucesso! Atualize a página para novo cadastro.")
-                except Exception as e:
-                    st.error(f"Erro ao salvar no banco de dados: {e}")
+                    st.success("✅ Registro salvo com sucesso!")
+            except Exception as e:
+                st.error(f"Erro ao salvar no banco: {e}")
+
+        # === Excluir Registro ===
+        st.markdown("---")
+        st.markdown("## 🗑️ Excluir Registro de Relacionamento")
+
+        try:
+            conn = conectar()
+            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cursor.execute("""
+                SELECT r.id, e.nome_escola, r.data_contato, r.hora_contato, r.resumo 
+                FROM registros r
+                JOIN escolas e ON r.id_escola = e.id
+                WHERE r.id_escola = %s
+                ORDER BY r.data_contato, r.hora_contato
+            """, (escolas_dict.get(nome_escola),))
+            registros = cursor.fetchall()
+            conn.close()
+
+            registros_dict = {
+                f"{r['id']} - {r['data_contato'].strftime('%d/%m/%Y')} {r['hora_contato']} - {r['resumo'][:60]}": r['id']
+                for r in registros
+            }
+
+            registro_selecionado = st.selectbox("Escolha o registro para excluir", [""] + list(registros_dict.keys()))
+
+            if registro_selecionado:
+                if st.button("❌ Excluir Registro"):
+                    try:
+                        conn = conectar()
+                        cursor = conn.cursor()
+                        cursor.execute("DELETE FROM registros WHERE id = %s", (registros_dict[registro_selecionado],))
+                        conn.commit()
+                        conn.close()
+                        st.success("Registro excluído com sucesso.")
+                    except Exception as e:
+                        st.error(f"Erro ao excluir: {e}")
+        except Exception as e:
+            st.error(f"Erro ao carregar registros para exclusão: {e}")

@@ -5,3 +5,5 @@ from . import jornada
 from . import dashboard
 from . import registro
 from . import tabela
+from . import download
+from . import jornada_contratual

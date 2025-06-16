@@ -74,7 +74,25 @@ def carregar():
 
         st.selectbox("Perfil Pedagógico", ["", "Cristã católica", "Cristã Evangelica", "Educação por princípio", "Cristã Clássica", "Convencional (Educação Moderna)"], index=(["Cristã católica", "Cristã Evangelica", "Educação por princípio", "Cristã Clássica", "Convencional (Educação Moderna)"].index(dados.get("perfil_pedagogico")) + 1 if dados and dados.get("perfil_pedagogico") in ["Cristã católica", "Cristã Evangelica", "Educação por princípio", "Cristã Clássica", "Convencional (Educação Moderna)"] else 0), key="form_perfil_pedagogico")
 
-        st.selectbox("Origem do Lead", ["", "Feira", "Instagram", "Network", "Envio de material (Livros)", "Opening Company", "ABEKA", "ACSI", "Outros"], index=(["Feira", "Instagram", "Network", "Envio de material (Livros)", "Opening Company", "ABEKA", "ACSI", "Outros"].index(dados.get("origem_lead")) + 1 if dados and dados.get("origem_lead") in ["Feira", "Instagram", "Network", "Envio de material (Livros)", "Opening Company", "ABEKA", "ACSI", "Outros"] else 0), key="form_origem_lead")
+        st.selectbox(
+            "Origem do Lead",
+            [
+                "", "Feira", "Instagram", "Network", "Envio de material (Livros)", "Opening Company",
+                "ABEKA", "ACSI", "Congresso", "Indicação por outra escola", "Outros"
+            ],
+            index=(
+                [
+                    "Feira", "Instagram", "Network", "Envio de material (Livros)", "Opening Company",
+                    "ABEKA", "ACSI", "Congresso", "Indicação por outra escola", "Outros"
+                ].index(dados.get("origem_lead")) + 1
+                if dados and dados.get("origem_lead") in [
+                    "Feira", "Instagram", "Network", "Envio de material (Livros)", "Opening Company",
+                    "ABEKA", "ACSI", "Congresso", "Indicação por outra escola", "Outros"
+                ]
+                else 0
+            ),
+            key="form_origem_lead"
+        )
 
         st.selectbox("Responsável pelo Cadastro", ["", "Raissa Fernandes", "Ranieri França", "Emmanuel Pires", "Isabela Rolim", "Renato Assis", "Thiago Dutra", "Bia Ruggeri", "Jhon Jarison", "Layla Ramos"], index=(["Raissa Fernandes", "Ranieri França", "Emmanuel Pires", "Isabela Rolim", "Renato Assis", "Thiago Dutra", "Bia Ruggeri", "Jhon Jarison", "Layla Ramos"].index(dados.get("responsavel_pedagogico")) + 1 if dados and dados.get("responsavel_pedagogico") in ["Raissa Fernandes", "Ranieri França", "Emmanuel Pires", "Isabela Rolim", "Renato Assis", "Thiago Dutra", "Bia Ruggeri", "Jhon Jarison", "Layla Ramos"] else 0), key="form_responsavel_pedagogico")
 
