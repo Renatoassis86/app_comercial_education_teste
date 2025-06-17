@@ -20,11 +20,11 @@ def carregar():
 
     escolas_dict = {nome: id_ for id_, nome in escolas}
 
-    st.markdown("### 🏫 Dados da Escola")
+    st.markdown("### Dados da Escola")
     nome_escola = st.selectbox("Selecione a escola", [""] + list(escolas_dict.keys()))
 
     if nome_escola:
-        st.markdown("### 🗒️ Dados do Registro")
+        st.markdown("### Dados do Registro")
         data_contato = st.date_input("Data do contato", value=datetime.now().date())
         hora_contato = datetime.now().time()  # Hora automática, não precisa ser preenchida manualmente
 
@@ -35,7 +35,7 @@ def carregar():
         contato = st.text_input("Nome do contato da escola")
         cargo = st.selectbox("Cargo do contato", ["", "Mantenedor", "Gestor", "Diretor", "Coordenador", "Professor", "Secretário(a)", "Outro"])
 
-        st.markdown("### 📊 Diagnóstico de Interesse")
+        st.markdown("### Diagnóstico de Interesse")
         interesse = st.selectbox("Interesse (Nível de interesse percebido)", ["", "Muito Baixo", "Baixo", "Médio", "Alto", "Muito Alto"])
 
         prontidao = st.selectbox("Prontidão (Fase da negociação)", [
@@ -50,7 +50,7 @@ def carregar():
             "Contato Futuro", "Elaboração de Contrato", "Contrato Enviado", "Contrato Assinado"
         ])
 
-        st.markdown("### 🎯 Informações Quantitativas")
+        st.markdown("### Informações Quantitativas")
         infantil = st.number_input("Qtd Infantil", min_value=0, step=1)
         fund1 = st.number_input("Qtd Fund1", min_value=0, step=1)
         fund2 = st.number_input("Qtd Fund2", min_value=0, step=1)
@@ -123,7 +123,7 @@ def carregar():
 
         # === Excluir Registro ===
         st.markdown("---")
-        st.markdown("## 🗑️ Excluir Registro de Relacionamento")
+        st.markdown("## Excluir Registro de Relacionamento")
 
         try:
             conn = conectar()

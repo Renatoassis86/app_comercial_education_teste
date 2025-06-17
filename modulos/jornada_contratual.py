@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from utils.banners import exibir_banner
 from utils.conexao import conectar
@@ -16,8 +15,6 @@ def carregar():
 
     if escola_selecionada:
         id_escola = int(escolas_df[escolas_df['nome_escola'] == escola_selecionada]['id'].values[0])
-
-        # Carrega dados existentes
         dados_existentes = pd.read_sql(f"SELECT * FROM contratos WHERE id_escola = {id_escola}", conn)
 
         st.subheader("📄 Status e Encaminhamentos")
@@ -25,12 +22,12 @@ def carregar():
         col1, col2, col3 = st.columns(3)
 
         status_formulario = col1.selectbox("Formulário enviado?", ["", "Sim", "Não"],
-                                            index=(["", "Sim", "Não"].index(dados_existentes['status_formulario'].iloc[0])
-                                                   if not dados_existentes.empty else 0))
+                                           index=(["", "Sim", "Não"].index(dados_existentes['status_formulario'].iloc[0])
+                                                  if not dados_existentes.empty else 0))
 
         formulario_recebido = col2.selectbox("Formulário recebido?", ["", "Sim", "Não"],
-                                              index=(["", "Sim", "Não"].index(dados_existentes['formulario_recebido'].iloc[0])
-                                                     if not dados_existentes.empty else 0))
+                                             index=(["", "Sim", "Não"].index(dados_existentes['formulario_recebido'].iloc[0])
+                                                    if not dados_existentes.empty else 0))
 
         status_minuta = col3.selectbox("Minuta enviada?", ["", "Sim", "Não"],
                                        index=(["", "Sim", "Não"].index(dados_existentes['status_minuta'].iloc[0])
@@ -40,9 +37,9 @@ def carregar():
                                       index=(["", "Sim", "Não"].index(dados_existentes['retorno_minuta'].iloc[0])
                                              if not dados_existentes.empty else 0))
 
-        observacao_minuta = st.text_area("🗒️ Observações ou principais pontos levantados pela escola sobre a minuta:",
-                                         value=(dados_existentes['observacao_minuta'].iloc[0]
-                                                if not dados_existentes.empty else ""))
+        observacao_minuta = st.text_area(
+            "🗒️ Observações ou principais pontos levantados pela escola sobre a minuta:",
+            value=(dados_existentes['observacao_minuta'].iloc[0] if not dados_existentes.empty else ""))
 
         atualizar_minuta = st.selectbox("Atualização da minuta?", ["", "Sim", "Não"],
                                         index=(["", "Sim", "Não"].index(dados_existentes['atualizar_minuta'].iloc[0])
@@ -60,7 +57,6 @@ def carregar():
                                           index=(["", "Sim", "Não"].index(dados_existentes['contrato_arquivado'].iloc[0])
                                                  if not dados_existentes.empty else 0))
 
-        # Recupera o último encaminhamento
         registros = pd.read_sql(f"""
             SELECT encaminhamento 
             FROM registros 
@@ -68,11 +64,12 @@ def carregar():
             ORDER BY data_contato DESC, hora_contato DESC LIMIT 1
         """, conn)
         encaminhamento_default = registros.iloc[0]['encaminhamento'] if not registros.empty else ""
+
         encaminhamento_final = st.text_input("Encaminhamento final",
                                              value=(dados_existentes['encaminhamento_final'].iloc[0]
                                                     if not dados_existentes.empty else encaminhamento_default))
 
-        st.subheader("🎯 Detalhes dos Alunos e Valores")
+        st.subheader("Detalhes dos Alunos e Valores")
 
         col1, col2 = st.columns(2)
 
@@ -141,7 +138,7 @@ def carregar():
             except Exception as e:
                 st.error(f"Erro ao salvar: {e}")
 
-    st.subheader("📊 Acompanhamento Geral")
+    st.subheader("Acompanhamento Geral")
     try:
         df = pd.read_sql("""
             SELECT c.*, e.nome_escola, e.estado
@@ -158,7 +155,7 @@ def carregar():
                 df['infantil5_qtd'] + df['fund1_qtd']
             )
 
-            st.dataframe(df[[ 
+            st.dataframe(df[[
                 'nome_escola', 'estado', 'encaminhamento_final',
                 'status_formulario', 'formulario_recebido', 'status_minuta',
                 'retorno_minuta', 'observacao_minuta',
@@ -169,23 +166,37 @@ def carregar():
             total_receita = df["valor_total"].sum()
 
             st.markdown("### 🎯 Acompanhamento de Metas")
-            fig, ax = plt.subplots(figsize=(6, 1.5))
-            ax.barh(['Alunos'], [3000], color='lightgray')
-            ax.barh(['Alunos'], [min(total_alunos, 3000)], color='green')
-            ax.text(3000, 0, "Meta: 3000", va='center', ha='right')
-            ax.text(total_alunos, 0, f"{total_alunos} alunos", va='center', ha='left')
-            ax.set_xlim(0, 3000)
-            ax.axis('off')
-            st.pyplot(fig)
 
-            fig, ax = plt.subplots(figsize=(6, 1.5))
-            ax.barh(['Receita'], [3000000], color='lightgray')
-            ax.barh(['Receita'], [min(total_receita, 3000000)], color='green')
-            ax.text(3000000, 0, "Meta: R$ 3M", va='center', ha='right')
-            ax.text(total_receita, 0, f"R$ {total_receita:,.2f}", va='center', ha='left')
-            ax.set_xlim(0, 3000000)
-            ax.axis('off')
-            st.pyplot(fig)
+            # === Gráfico de Alunos ===
+            meta_alunos = 3000
+            percentual_alunos = (total_alunos / meta_alunos) * 100
+
+            fig1, ax1 = plt.subplots(figsize=(6, 0.8))
+            ax1.barh(['Alunos'], [meta_alunos], color='#e9ecef', height=0.4)
+            ax1.barh(['Alunos'], [min(total_alunos, meta_alunos)], color='#28a745', height=0.4)
+            ax1.text(meta_alunos, 0, "Meta: 3000", va='center', ha='right', fontsize=9, color='#6c757d')
+            ax1.text(total_alunos + 50, 0, f"{total_alunos} alunos", va='center', ha='left', fontsize=9, color='#212529')
+            ax1.text(meta_alunos * 0.5, 0, f"{percentual_alunos:.1f}%", va='center', ha='center',
+                     fontsize=10, color='#212529', weight='bold')
+            ax1.set_xlim(0, meta_alunos * 1.1)
+            ax1.axis('off')
+            st.pyplot(fig1)
+
+            # === Gráfico de Receita ===
+            meta_revenue = 3000000
+            percentual_receita = (total_receita / meta_revenue) * 100
+
+            fig2, ax2 = plt.subplots(figsize=(6, 0.8))
+            ax2.barh(['Receita'], [meta_revenue], color='#e9ecef', height=0.4)
+            ax2.barh(['Receita'], [min(total_receita, meta_revenue)], color='#007bff', height=0.4)
+            ax2.text(meta_revenue, 0, "Meta: R$ 3M", va='center', ha='right', fontsize=9, color='#6c757d')
+            ax2.text(total_receita + 50000, 0, f"R$ {total_receita:,.2f}", va='center', ha='left', fontsize=9,
+                     color='#212529')
+            ax2.text(meta_revenue * 0.5, 0, f"{percentual_receita:.1f}%", va='center', ha='center',
+                     fontsize=10, color='#212529', weight='bold')
+            ax2.set_xlim(0, meta_revenue * 1.1)
+            ax2.axis('off')
+            st.pyplot(fig2)
 
     except Exception as e:
         st.error(f"Erro ao carregar dados de acompanhamento: {e}")

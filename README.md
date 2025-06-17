@@ -77,23 +77,34 @@ streamlit run app.py
 ## Estrutura do Projeto
 
 ```
-📦 paideia_app/
+📦 app_comercial_education
 ├── app.py
 ├── .env
 ├── requirements.txt
 ├── README.md
-├── modulos/
+├── 📂 modulos
 │   ├── cadastro.py
 │   ├── dashboard.py
 │   ├── jornada.py
+│   ├── jornada_contratual.py
 │   ├── registro.py
-│   ├── sobre.py
 │   ├── tabela.py
-├── utils/
+│   ├── download.py
+│   ├── formulario.py
+│   ├── login.py
+│   └── gestao_usuarios.py
+├── 📂 utils
 │   ├── conexao.py
 │   ├── css.py
 │   ├── banners.py
-│   ├── helpers.py
+│   ├── estados_cidades.py
+│   ├── email_utils.py
+├── 📂 imagens
+│   └── logo_azul.png
+├── 📂 documentos
+│   ├── Ficha_Cadastral.docx
+│   ├── Minuta_Contrato.pdf
+
 ```
 
 ---
