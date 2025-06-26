@@ -13,6 +13,11 @@ def aplicar_estilo():
             header[data-testid="stHeader"], footer {
                 display: none;
             }
+            input, textarea, select {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+            
 
             .block-container {
                 padding-top: 1rem !important;

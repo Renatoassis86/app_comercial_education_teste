@@ -67,7 +67,7 @@ def carregar():
     rp_email = st.text_input("Email", key="rp_email")
     rp_celular = st.text_input("Celular", key="rp_celular")
 
-    if st.button("Enviar Formulário"):
+    if st.button("📤 Enviar Formulário"):
         try:
             conn = conectar()
             cursor = conn.cursor()
