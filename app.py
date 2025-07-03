@@ -1,4 +1,5 @@
 import streamlit as st
+import modulos.calculadora as calculadora
 from utils.css import aplicar_estilo
 from modulos import (
     pagina_inicial, sobre, cadastro, registro, jornada,
@@ -46,12 +47,12 @@ else:
     # === Menu com base no cargo ===
     if cargo == 'gerente':
         menu = [
-            "Página Inicial", "Sobre", "Cadastro", "Registro de Negociação", "Jornada de Relacionamento", "Jornada Contratual", 
+            "Página Inicial", "Sobre", "Cadastro", "Registro de Negociação", "Jornada de Relacionamento", "Jornada Contratual", "Calculadora", 
             "Dashboard", "Tabela Geral", "Gestão de Usuários", "Formulário", "Download", "Sair"
         ]
     elif cargo in ['consultor', 'supervisor', 'assistente']:
         menu = [
-            "Página Inicial", "Sobre", "Cadastro", "Registro de Negociação", "Jornada de Relacionamento", "Jornada Contratual", 
+            "Página Inicial", "Sobre", "Cadastro", "Registro de Negociação", "Jornada de Relacionamento", "Jornada Contratual", "Calculadora",
             "Dashboard", "Tabela Geral", "Formulário", "Download", "Sair"
         ]
     elif cargo == "formulario":
@@ -96,12 +97,18 @@ else:
 
     elif escolha == "Sobre":
         sobre.carregar()
+    
+    elif escolha == "Calculadora":
+        calculadora.carregar()
 
     elif escolha == "Sair":
         for chave in ['autenticado', 'usuario_nome', 'usuario_email', 'usuario_cargo']:
             if chave in st.session_state:
                 del st.session_state[chave]
         st.rerun()
+
+
+
 
 # === Footer ===
 st.markdown(

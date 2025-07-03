@@ -157,6 +157,11 @@ def aplicar_estilo():
                 color: #999999;
             }
 
+            /* Unificar fonte de todos os componentes */
+            .stTextInput, .stNumberInput, .stSelectbox, .stMetric, .stDataFrame, .stMarkdown, .css-1aumxhk, .css-1offfwp, .css-1v0mbdj, .css-1dp5vir, .css-10trblm {
+                font-family: 'Segoe UI', sans-serif !important;
+            }
+
             /* === Banners === */
             img.banner {
                 width: 100%;
